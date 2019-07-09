@@ -38,6 +38,9 @@ public class MailConfig {
 		props.put("mail.smtp.auth", true);
 		props.put("mail.smtp.ssl.trust", env.getProperty("mail.smtp.ssl.trust"));
 		props.put("mail.smtp.starttls.enable", true);
+		props.put("mail.smtp.ssl.enable", true);
+		props.put("mail.smtp.socketFactory.port", 465);
+		props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		props.put("mail.smtp.connectiontimeout", Integer.parseInt(env.getProperty("mail.smtp.connectiontimeout"))); // em
 																													// mili
 																													// segundos
