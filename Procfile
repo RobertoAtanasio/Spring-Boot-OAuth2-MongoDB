@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT $JAVA_OPTS -jar target/ws-oauth2-1.0.0-SNAPSHOT.jar
+web: java -Dserver.port=$PORT -Dspring.profiles.active=prod -jar target/ws-oauth2-1.0.0-SNAPSHOT.jar
