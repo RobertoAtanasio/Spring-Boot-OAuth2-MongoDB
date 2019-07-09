@@ -17,13 +17,14 @@ import com.rapl.curso.ws.repository.RegrasRepository;
 import com.rapl.curso.ws.repository.UsuarioRepository;
 import com.rapl.curso.ws.repository.VerificacaoTokenRepository;
 import com.rapl.curso.ws.security.utils.PasswordUtils;
-import com.rapl.curso.ws.services.email.EmailService;
+import com.rapl.curso.ws.services.email.Mailer;
+//import com.rapl.curso.ws.services.email.EmailService;
 import com.rapl.curso.ws.services.exception.ObjetoJaExistenteException;
 import com.rapl.curso.ws.services.exception.ObjetoNaoEncontradoException;
 
 @Service
 public class UsuarioService {
-
+	
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
@@ -33,8 +34,11 @@ public class UsuarioService {
 	@Autowired
 	private VerificacaoTokenRepository verificacaoTokenRepository;
 
+//	@Autowired
+//	private EmailService emailService;
+	
 	@Autowired
-	private EmailService emailService;
+	private Mailer mailer;
 
 	public List<Usuario> findAll() {
 		return usuarioRepository.findAll();
@@ -82,7 +86,7 @@ public class UsuarioService {
 		usuario.setRoles(Arrays.asList(roleRepository.findByName("ROLE_USER").get()));
 		usuario.setEnabled(false);
 		usuario = this.create(usuario);
-		this.emailService.sendConfirmationHtmlEmail(usuario, null);
+		this.mailer.enviarEmailRequisicaoConfirmacao(usuario, null);
 		return usuario;
 	}
 
@@ -124,7 +128,7 @@ public class UsuarioService {
 		Optional<VerificacaoToken> vToken = verificacaoTokenRepository.findByUsuario(user);
 		vToken.get().updateToken(UUID.randomUUID().toString());
 		VerificacaoToken updateVToken = verificacaoTokenRepository.save(vToken.get());
-		emailService.sendConfirmationHtmlEmail(user, updateVToken);
+		mailer.enviarEmailRequisicaoConfirmacao(user, updateVToken);
 		return updateVToken;
 	}
 }

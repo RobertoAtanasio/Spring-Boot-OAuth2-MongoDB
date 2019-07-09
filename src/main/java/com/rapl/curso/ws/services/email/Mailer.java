@@ -1,54 +1,67 @@
 package com.rapl.curso.ws.services.email;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.rapl.curso.ws.config.MailConfig;
 import com.rapl.curso.ws.domain.Usuario;
+import com.rapl.curso.ws.domain.VerificacaoToken;
+import com.rapl.curso.ws.services.UsuarioService;
 
 @Component
 public class Mailer {
 
 	@Autowired
-	private JavaMailSender javaMailSender;
-
-	@Autowired
 	private TemplateEngine thymeleaf;
-
-	public void enviarEmail(String remetente, List<String> destinatarios, String assunto, String template,
-			Map<String, Object> variaveis) {
-		Context context = new Context(new Locale("pt", "BR"));
-		variaveis.entrySet().forEach(e -> context.setVariable(e.getKey(), e.getValue()));
-		String mensagem = thymeleaf.process(template, context);
-		this.enviarEmail(remetente, destinatarios, assunto, mensagem);
-	}
-
-	public void enviarEmail(String remetente, List<String> destinatarios, String assunto, String mensagem) {
-		try {
-			MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-
-			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
-			helper.setFrom(remetente);
-			helper.setTo(destinatarios.toArray(new String[destinatarios.size()]));
-			helper.setSubject(assunto);
-			helper.setText(mensagem, true); // true - mensagem em html
-
-			javaMailSender.send(mimeMessage);
-		} catch (MessagingException e) {
-			throw new RuntimeException("Problemas com o envio de e-mail!", e);
+	
+	@Autowired
+	private UsuarioService usuarioService;
+	
+	@Autowired
+	private MailConfig mailConfig;
+	
+	@Value("${default.sender}")
+	private String sender;
+	
+	@Value("${default.url}")
+	private String contextPath;
+	
+	public void enviarEmailRequisicaoConfirmacao(Usuario usuario, VerificacaoToken vToken) {
+		
+		Map<String, Object> variaveis = new HashMap<>();
+		
+		String remetente = this.sender;
+		String assunto = "Confirmação de Registro";
+		List<String> listaEmails = new ArrayList<>();
+		listaEmails.add(usuario.getEmail());	
+		
+		String token = UUID.randomUUID().toString();
+		if (vToken == null) {
+			this.usuarioService.criarVerificacaoTokenParaUsuario(usuario, token);
+		} else {
+			token = vToken.getToken();
 		}
+		
+		String confirmationUrl = this.contextPath + "/api/public/regitrationConfirm/users?token=" + token;		
+
+		Context context = new Context(new Locale("pt", "BR"));
+		context.setVariable("user", usuario);
+		context.setVariable("confirmationUrl", confirmationUrl);
+		variaveis.entrySet().forEach(e -> context.setVariable(e.getKey(), e.getValue()));
+		String template = thymeleaf.process("email/registerUser", context);
+		
+		mailConfig.enviarEmail(remetente, listaEmails, assunto, template);
 	}
 	
 	public void avisarSobreUsuariosNaoLiberados(List<Usuario> usuarios, List<Usuario> destinatarios) {
@@ -57,7 +70,7 @@ public class Mailer {
 		
 		variaveis.put("usuarios", usuarios);	// incluir a lista de lançamentos vencidos
 		
-		List<String> emailsDestinatarios = destinatarios.stream()
+		List<String> listaEmails = destinatarios.stream()
 				.map(u -> "roberto.atanasio.pl@gmail.com")
 				.collect(Collectors.toList());
 		
@@ -67,14 +80,12 @@ public class Mailer {
 		
 		String remetente = "roberto.atanasio.pl@gmail.com";
 		String assunto = "Usuários não liberados";
-		String template = "mail/aviso-lancamentos-vencidos";
 		
-		this.enviarEmail(
-				remetente, 
-				emailsDestinatarios, 
-				assunto, 
-				template, 
-				variaveis);
+		Context context = new Context(new Locale("pt", "BR"));
+		variaveis.entrySet().forEach(e -> context.setVariable(e.getKey(), e.getValue()));
+		String template = thymeleaf.process("mail/aviso-lancamentos-vencidos", context);
+		
+		mailConfig.enviarEmail(remetente, listaEmails, assunto, template);
 	}
 	
 //--- script para testar o envio do email
