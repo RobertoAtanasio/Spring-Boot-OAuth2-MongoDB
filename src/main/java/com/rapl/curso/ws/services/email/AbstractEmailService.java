@@ -34,7 +34,7 @@ public abstract class AbstractEmailService implements EmailService{
     @Override
     public void sendConfirmationHtmlEmail(Usuario usuario, VerificacaoToken vToken){
         try {
-            MimeMessage mimeMessage = prepareMimeMessageFromUser(usuario, vToken);
+            MimeMessage mimeMessage = prepareMimeMessageFromUser(usuario, vToken);            
             sendHtmlEmail(mimeMessage);
         } catch (MessagingException msg) {
             throw new ObjetoNaoEncontradoException(String.format("Erro ao tentar enviar o e-mail"));
