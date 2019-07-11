@@ -106,11 +106,13 @@ public class UsuarioService {
 	public String validateVerificationToken(String token) {
 		final Optional<VerificacaoToken> vToken = verificacaoTokenRepository.findByToken(token);
 		if (!vToken.isPresent()) {
+			// mensagem que será usada na API FrontEnd na classe InterceptorService 
 			return "invalidToken";
 		}
 		final Usuario usuario = vToken.get().getUsuario();
 		final Calendar cal = Calendar.getInstance();
 		if ((vToken.get().getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+			// mensagem que será usada na API FrontEnd na classe InterceptorService
 			return "expired";
 		}
 		usuario.setEnabled(true);
