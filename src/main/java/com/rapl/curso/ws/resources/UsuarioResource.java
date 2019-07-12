@@ -26,6 +26,11 @@ import com.rapl.curso.ws.domain.Usuario;
 import com.rapl.curso.ws.dto.UsuarioDTO;
 import com.rapl.curso.ws.services.UsuarioService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
+@Api(tags = { "UsuarioResource" })
 @RestController
 @RequestMapping("/api")
 public class UsuarioResource {
@@ -51,12 +56,16 @@ public class UsuarioResource {
         return ResponseEntity.ok().body(listDTO);
     }
 	
+	@ApiOperation("Retorna um especifico usuário através do seu identificador.")
 	@GetMapping("/users/{id}")
-    public ResponseEntity<UsuarioDTO> findById(@PathVariable String id) {
+    public ResponseEntity<UsuarioDTO> findById(
+    		@ApiParam("Id do usuário não pode ser vazio.")
+    		@PathVariable String id) {
 		Usuario usuario = usuarioService.findById(id);
 		return ResponseEntity.ok().body(new UsuarioDTO(usuario));
     }
 	
+	@ApiOperation("Cria e retorna o usuário inserido na base.")
 	@PostMapping("/users")
     public ResponseEntity<UsuarioDTO> create(@RequestBody UsuarioDTO userDTO) {
 		Usuario usuario = usuarioService.fromDTO(userDTO);
