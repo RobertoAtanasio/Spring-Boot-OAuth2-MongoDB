@@ -38,7 +38,6 @@ public class Mailer {
 	private String contextPath;
 	
 	public void enviarEmailRequisicaoConfirmacao(Usuario usuario, VerificacaoToken vToken) {
-		
 		Map<String, Object> variaveis = new HashMap<>();
 		
 		String remetente = this.sender;

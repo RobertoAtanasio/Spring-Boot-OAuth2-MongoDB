@@ -8,7 +8,6 @@ import com.rapl.curso.ws.domain.Regras;
 import com.rapl.curso.ws.domain.Usuario;
 
 public class UsuarioDTO implements Serializable {
-
 	private static final long serialVersionUID = 1L;
 
 	private String id;
