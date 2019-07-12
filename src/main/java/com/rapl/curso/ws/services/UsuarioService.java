@@ -62,17 +62,21 @@ public class UsuarioService {
 					.orElseThrow(() -> new ObjetoNaoEncontradoException("Regra não encontrada!"));
 			r.setId(regra.getId());
 		});
-
 		usuario.setRoles(regras);
 		return usuarioRepository.save(usuario);
 	}
 
 	public Usuario update(Usuario usuario) {
 		Optional<Usuario> updateUser = usuarioRepository.findById(usuario.getId());
-		return updateUser
-				.map(u -> usuarioRepository.save(new Usuario(u.getId(), usuario.getFirstName(), usuario.getLastName(),
-						usuario.getEmail(), usuario.getPassword(), usuario.isEnabled())))
-				.orElseThrow(() -> new ObjetoNaoEncontradoException("Usuário não encontrado!"));
+		if (updateUser.isPresent()) {
+			Usuario usuarioUpdate = updateUser.get();
+			usuarioUpdate.setEmail(usuario.getEmail());
+			usuarioUpdate.setLastName(usuario.getLastName());
+			usuarioUpdate.setFirstName(usuario.getFirstName());
+			return usuarioRepository.save(usuarioUpdate);
+		} else {
+			throw new ObjetoNaoEncontradoException("Usuário não encontrado!");
+		}
 	}
 
 	public void delete(String id) {
