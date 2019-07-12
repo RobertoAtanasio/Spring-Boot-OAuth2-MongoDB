@@ -47,7 +47,6 @@ public class UsuarioResource {
 //        return ResponseEntity.ok().body(users);
 		
 		List<Usuario> usarios = usuarioService.findAll();
-		
 		List<UsuarioDTO> listDTO = usarios.stream().map(x -> new UsuarioDTO(x)).collect(Collectors.toList());
         return ResponseEntity.ok().body(listDTO);
     }
